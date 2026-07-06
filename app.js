@@ -447,6 +447,9 @@ const defaultState = {
     matchedItems: [],
     activeSubGameLevel: 1,
     lightsOffState: { tv: true, light: true, fan: true, faucet: true },
+    bugsSquishedCount: 0,
+    squishedBugIds: [],
+    carbonAnswers: { transport: null, bag: null, plant: null },
     buildProgress: 0, // 0, 50, 100
     familyQuestDone: false,
     familyQuestMedia: {
@@ -465,6 +468,9 @@ const defaultState = {
     matchedItems: [],
     activeSubGameLevel: 1,
     lightsOffState: { tv: true, light: true, fan: true, faucet: true },
+    nightmaresClearedCount: 0,
+    clearedNightmareIds: [],
+    soothingSoundsState: { rain: false, birds: false, horn: true, hammer: true },
     buildProgress: 0,
     familyQuestDone: false,
     familyQuestMedia: {
@@ -689,7 +695,19 @@ function renderMiniGameScreen() {
   const subLevel = kitState.activeSubGameLevel || 1;
 
   if (subLevel === 2) {
-    return renderLightsOffGame();
+    if (state.activeKitId === "kit_green_christmas") {
+      return renderSavePineyBugsGame();
+    } else {
+      return renderDefeatNightmaresGame();
+    }
+  }
+
+  if (subLevel === 3) {
+    if (state.activeKitId === "kit_green_christmas") {
+      return renderCarbonFootprintGame();
+    } else {
+      return renderSoothingSoundsGame();
+    }
   }
 
   const isMatchedAll = kitState.matchedItems.length === kit.miniGame.itemsToClassify.length;
@@ -736,86 +754,330 @@ function renderMiniGameScreen() {
       
       <div class="game-controls" style="display: ${isMatchedAll ? 'block' : 'none'}">
         <button class="primary-action pulse" type="button" data-minigame-next-sublevel>
-          Vào Thử thách 2: Tiết kiệm năng lượng ⚡
+          Vào Thử thách 2: ${state.activeKitId === "kit_green_christmas" ? "Bảo vệ thông non 🐛" : "Xua đuổi ác mộng ☁️"}
         </button>
       </div>
     </div>
   `;
 }
 
-function renderLightsOffGame() {
-  const kitState = state[state.activeKitId];
-  const lightsOff = kitState.lightsOffState || { tv: true, light: true, fan: true, faucet: true };
-  
-  let totalWaste = 0;
-  if (lightsOff.tv) totalWaste += 80;
-  if (lightsOff.light) totalWaste += 40;
-  if (lightsOff.fan) totalWaste += 60;
-  if (lightsOff.faucet) totalWaste += 20;
-  
-  const isWon = totalWaste === 0;
-  
+function renderSavePineyBugsGame() {
+  const kitState = state.kit_green_christmas;
+  const squished = kitState.squishedBugIds || [];
+  const isWon = squished.length >= 5;
+
+  const bugs = [
+    { id: "bug_1", type: "beetle", icon: "🐛", top: "20%", left: "25%", label: "Sâu đục vỏ" },
+    { id: "bug_2", type: "beetle", icon: "🐛", top: "45%", left: "70%", label: "Bọ thông hại" },
+    { id: "bug_3", type: "beetle", icon: "🐛", top: "65%", left: "15%", label: "Mọt đục gỗ" },
+    { id: "bug_4", type: "beetle", icon: "🐛", top: "35%", left: "45%", label: "Sâu ăn lá" },
+    { id: "bug_5", type: "beetle", icon: "🐛", top: "75%", left: "60%", label: "Bọ vỏ thông" },
+    { id: "lady_1", type: "ladybug", icon: "🐞", top: "15%", left: "65%", label: "Bọ rùa đỏ" },
+    { id: "lady_2", type: "ladybug", icon: "🐞", top: "55%", left: "40%", label: "Bọ rùa vàng" }
+  ];
+
   return `
-    <div class="minigame-screen-shell lights-off-game region-${state.activeKitId === "kit_green_christmas" ? "recycle" : "friends"}">
+    <div class="minigame-screen-shell save-piney-bugs-game region-recycle">
       <div class="game-instructions">
-        <p class="kicker">Màn 3: Thử thách 2 (Tiết kiệm năng lượng)</p>
-        <h2>Tắt các thiết bị điện lãng phí!</h2>
-        <p class="help-text">Nhấn vào các thiết bị đang bật trong phòng trống để tiết kiệm điện nhé bé.</p>
+        <p class="kicker">Màn 3: Thử thách 2 (Bảo vệ thông non)</p>
+        <h2>Tiêu diệt sâu đục thân cứu Piney!</h2>
+        <p class="help-text">Nhấp vào 5 chú sâu hại màu xanh đang bò phá hoại cây thông. Hãy chừa lại các bạn bọ rùa đỏ 🐞 có ích nhé!</p>
       </div>
-      
-      <div class="power-meter-box">
-        <span class="power-meter-label">⚡ Lượng điện đang lãng phí</span>
-        <div class="power-meter-bar-wrap">
-          <div class="power-meter-bar-fill" style="width: ${(totalWaste / 200) * 100}%"></div>
-          <span class="power-meter-val">${totalWaste}W / 200W</span>
+
+      <div class="pine-bark-container">
+        <div class="pine-tree-trunk">
+          ${bugs.map(bug => {
+            const isSquished = squished.includes(bug.id);
+            return `
+              <button class="bug-entity ${bug.type} ${isSquished ? 'squished' : ''}" 
+                type="button" 
+                style="top: ${bug.top}; left: ${bug.left};" 
+                data-bug-id="${bug.id}"
+                data-bug-type="${bug.type}"
+                ${isSquished ? 'disabled' : ''}>
+                <span class="bug-icon">${isSquished ? '💥' : bug.icon}</span>
+                <span class="bug-label">${bug.label}</span>
+              </button>
+            `;
+          }).join("")}
         </div>
       </div>
-      
-      <div class="devices-grid">
-        <button class="device-card ${lightsOff.tv ? 'active' : 'off'}" type="button" data-toggle-device="tv">
-          <span class="device-icon">📺</span>
-          <div class="device-info">
-            <strong>Tivi phòng trống</strong>
-            <span>${lightsOff.tv ? 'Đang bật · 80W' : 'Đã tắt · 0W'}</span>
-          </div>
-          <span class="device-action-btn">${lightsOff.tv ? 'Tắt đi 🔌' : 'Đã tắt'}</span>
-        </button>
-        
-        <button class="device-card ${lightsOff.light ? 'active' : 'off'}" type="button" data-toggle-device="light">
-          <span class="device-icon">💡</span>
-          <div class="device-info">
-            <strong>Bóng đèn học</strong>
-            <span>${lightsOff.light ? 'Đang bật · 40W' : 'Đã tắt · 0W'}</span>
-          </div>
-          <span class="device-action-btn">${lightsOff.light ? 'Tắt đi 🔌' : 'Đã tắt'}</span>
-        </button>
-        
-        <button class="device-card ${lightsOff.fan ? 'active' : 'off'}" type="button" data-toggle-device="fan">
-          <span class="device-icon">🌀</span>
-          <div class="device-info">
-            <strong>Quạt trần bật thừa</strong>
-            <span>${lightsOff.fan ? 'Đang bật · 60W' : 'Đã tắt · 0W'}</span>
-          </div>
-          <span class="device-action-btn">${lightsOff.fan ? 'Tắt đi 🔌' : 'Đã tắt'}</span>
-        </button>
-        
-        <button class="device-card ${lightsOff.faucet ? 'active' : 'off'}" type="button" data-toggle-device="faucet">
-          <span class="device-icon">🚰</span>
-          <div class="device-info">
-            <strong>Vòi nước bị rỉ</strong>
-            <span>${lightsOff.faucet ? 'Đang rò rỉ · 20W' : 'Đã khóa chặt · 0W'}</span>
-          </div>
-          <span class="device-action-btn">${lightsOff.faucet ? 'Khóa vòi 💧' : 'Đã khóa'}</span>
-        </button>
+
+      <div class="game-progress-bar">
+        <span class="progress-label">🐛 Sâu gỗ đã diệt: ${squished.length} / 5</span>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" style="width: ${(squished.length / 5) * 100}%"></div>
+        </div>
       </div>
-      
+
       <div class="game-feedback" id="game-feedback-box">
         <video autoplay loop muted playsinline src="${characterVideos.happy}" class="feedback-avatar"></video>
         <p class="feedback-text" id="game-feedback-text">
-          ${isWon ? 'Tuyệt cú mèo! Bé đã tiết kiệm được toàn bộ năng lượng rồi!' : 'Bana đang đợi bé tắt các thiết bị thừa đó!'}
+          ${isWon ? 'Bé giỏi quá! Thân thông đã sạch bóng sâu bọ rồi!' : 'Bana đang chờ bé bắt hết sâu đục thân đấy!'}
         </p>
       </div>
-      
+
+      <div class="game-controls" style="display: ${isWon ? 'block' : 'none'}">
+        <button class="primary-action pulse" type="button" data-minigame-goto-level3>
+          Vào Thử thách 3: Giảm Dấu chân Carbon 👣
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderCarbonFootprintGame() {
+  const kitState = state.kit_green_christmas;
+  const answers = kitState.carbonAnswers || { transport: null, bag: null, plant: null };
+  
+  const scenarios = [
+    {
+      id: "transport",
+      title: "1. Đi học hàng ngày",
+      question: "Bé chọn phương tiện nào để đến trường giảm khói bụi?",
+      options: [
+        { key: "bike", label: "Đi xe đạp/Đi bộ", icon: "🚲", correct: true, feedback: "Tuyệt vời! Xe đạp không thải khói carbon!" },
+        { key: "car", label: "Đi ô tô riêng", icon: "🚗", correct: false, feedback: "Ô tô thải nhiều khí Carbonox gây nóng Trái Đất." }
+      ]
+    },
+    {
+      id: "bag",
+      title: "2. Đi chợ mua sắm",
+      question: "Để đựng rau quả mua cùng mẹ, bé chọn túi nào?",
+      options: [
+        { key: "plastic", label: "Túi nilon dùng 1 lần", icon: "🛍️", correct: false, feedback: "Túi nilon mất hàng trăm năm mới phân hủy được." },
+        { key: "canvas", label: "Túi vải tái sử dụng", icon: "👜", correct: true, feedback: "Rất tốt! Túi vải bền và bảo vệ môi trường!" }
+      ]
+    },
+    {
+      id: "plant",
+      title: "3. Chăm sóc cây cối",
+      question: "Gặp cây xanh ngoài vườn, bé nên làm gì nhỉ?",
+      options: [
+        { key: "water", label: "Tưới nước, chăm cây", icon: "🪴", correct: true, feedback: "Đúng rồi! Cây xanh hấp thụ Carbon, tạo Oxy mát lành!" },
+        { key: "break", label: "Bẻ cành hái lá", icon: "🌿", correct: false, feedback: "Làm tổn thương cây xanh sẽ khiến khí Carbonox tăng lên." }
+      ]
+    }
+  ];
+
+  let correctCount = 0;
+  if (answers.transport === "bike") correctCount++;
+  if (answers.bag === "canvas") correctCount++;
+  if (answers.plant === "water") correctCount++;
+
+  const isWon = correctCount === 3;
+  const carbonPercentage = 90 - (correctCount * 30); // 90%, 60%, 30%, 0%
+
+  return `
+    <div class="minigame-screen-shell carbon-footprint-game region-recycle">
+      <div class="game-instructions">
+        <p class="kicker">Màn 3: Thử thách 3 (Lối sống xanh)</p>
+        <h2>Cắt giảm dấu chân Carbon của bé!</h2>
+        <p class="help-text">Hãy chọn các hành động đúng để kéo thanh đo khí nhà kính Carbonox xuống mức an toàn nhé bé.</p>
+      </div>
+
+      <div class="carbon-meter-box ${isWon ? 'safe' : ''}">
+        <span class="carbon-meter-label">👣 Chỉ số Dấu chân Carbon: ${carbonPercentage}%</span>
+        <div class="carbon-meter-wrap">
+          <div class="carbon-meter-fill" style="width: ${carbonPercentage}%"></div>
+        </div>
+        <p class="carbon-status-text">${isWon ? '🌿 Dấu chân Carbon cực kỳ thấp! Rừng thông đã an toàn!' : '⚠️ Chỉ số Carbon quá cao, hãy chọn lối sống xanh để hạ chỉ số!'}</p>
+      </div>
+
+      <div class="scenarios-list">
+        ${scenarios.map(sc => {
+          const selectedKey = answers[sc.id];
+          return `
+            <div class="scenario-card ${selectedKey ? 'answered' : ''}">
+              <h3>${sc.title}</h3>
+              <p class="scenario-question">${sc.question}</p>
+              <div class="scenario-options">
+                ${sc.options.map(opt => {
+                  const isSelected = selectedKey === opt.key;
+                  const isCorrect = opt.correct;
+                  let btnClass = "";
+                  if (isSelected) {
+                    btnClass = isCorrect ? "correct" : "incorrect";
+                  }
+                  return `
+                    <button class="option-btn ${btnClass} ${selectedKey && !isSelected ? 'disabled' : ''}"
+                      type="button"
+                      data-carbon-sc-id="${sc.id}"
+                      data-carbon-opt-key="${opt.key}"
+                      ${selectedKey ? 'disabled' : ''}>
+                      <span class="opt-icon">${opt.icon}</span>
+                      <span class="opt-label">${opt.label}</span>
+                    </button>
+                  `;
+                }).join("")}
+              </div>
+              ${selectedKey ? `
+                <div class="scenario-feedback ${sc.options.find(o => o.key === selectedKey).correct ? 'correct' : 'incorrect'}">
+                  ${sc.options.find(o => o.key === selectedKey).feedback}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join("")}
+      </div>
+
+      <div class="game-feedback" id="game-feedback-box">
+        <video autoplay loop muted playsinline src="${characterVideos.happy}" class="feedback-avatar"></video>
+        <p class="feedback-text" id="game-feedback-text">
+          ${isWon ? 'Bé thật tuyệt vời! Lối sống xanh của bé giúp bảo vệ Trái Đất thân yêu!' : 'Bana đang chờ bé hoàn thành cả 3 tình huống sống xanh!'}
+        </p>
+      </div>
+
+      <div class="game-controls" style="display: ${isWon ? 'block' : 'none'}">
+        <button class="primary-action pulse" type="button" data-minigame-finish>
+          Tiếp tục chế tạo KIT thực tế 🛠️
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderDefeatNightmaresGame() {
+  const kitState = state.kit_dreamcatcher;
+  const cleared = kitState.clearedNightmareIds || [];
+  const isWon = cleared.length >= 5;
+
+  const entities = [
+    { id: "night_1", type: "nightmare", icon: "☁️😈", top: "25%", left: "15%", label: "Quái vật bóng tối" },
+    { id: "night_2", type: "nightmare", icon: "☁️😈", top: "45%", left: "75%", label: "Cơn mơ sợ hãi" },
+    { id: "night_3", type: "nightmare", icon: "☁️😈", top: "65%", left: "20%", label: "Tiếng động lạ" },
+    { id: "night_4", type: "nightmare", icon: "☁️😈", top: "30%", left: "48%", label: "Ảo ảnh bóng đen" },
+    { id: "night_5", type: "nightmare", icon: "☁️😈", top: "70%", left: "58%", label: "Ác mộng mất ngủ" },
+    { id: "star_1", type: "star", icon: "🌟", top: "15%", left: "75%", label: "Sao ước mơ" },
+    { id: "star_2", type: "star", icon: "🌟", top: "55%", left: "40%", label: "Sao hy vọng" }
+  ];
+
+  return `
+    <div class="minigame-screen-shell defeat-nightmares-game region-friends">
+      <div class="game-instructions">
+        <p class="kicker">Màn 3: Thử thách 2 (Xua đuổi ác mộng)</p>
+        <h2>Xua đuổi Ác mộng giúp Chuối Tiêu!</h2>
+        <p class="help-text">Chạm vào 5 đám mây ác mộng để phá tan bóng tối phòng ngủ. Đừng làm vỡ những ngôi sao giấc mơ 🌟 nhé!</p>
+      </div>
+
+      <div class="bedroom-night-scene">
+        <div class="bedroom-window"></div>
+        <div class="dreamcatcher-shadow"></div>
+        <div class="entities-overlay">
+          ${entities.map(ent => {
+            const isCleared = cleared.includes(ent.id);
+            return `
+              <button class="dream-entity ${ent.type} ${isCleared ? 'cleared' : ''}" 
+                type="button" 
+                style="top: ${ent.top}; left: ${ent.left};" 
+                data-nightmare-id="${ent.id}"
+                data-entity-type="${ent.type}"
+                ${isCleared ? 'disabled' : ''}>
+                <span class="entity-icon">${isCleared ? '✨' : ent.icon}</span>
+                <span class="entity-label">${ent.label}</span>
+              </button>
+            `;
+          }).join("")}
+        </div>
+      </div>
+
+      <div class="game-progress-bar">
+        <span class="progress-label">🌟 Ác mộng đã xua đuổi: ${cleared.length} / 5</span>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" style="width: ${(cleared.length / 5) * 100}%;"></div>
+        </div>
+      </div>
+
+      <div class="game-feedback" id="game-feedback-box">
+        <video autoplay loop muted playsinline src="${characterVideos.happy}" class="feedback-avatar"></video>
+        <p class="feedback-text" id="game-feedback-text">
+          ${isWon ? 'Bé Chuối Tiêu đã có một giấc ngủ an yên ấm áp rồi!' : 'Bana đang chờ bé giúp xua tan bóng tối phòng ngủ!'}
+        </p>
+      </div>
+
+      <div class="game-controls" style="display: ${isWon ? 'block' : 'none'}">
+        <button class="primary-action pulse" type="button" data-minigame-goto-level3>
+          Vào Thử thách 3: Hòa âm Giấc ngủ 🎵
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderSoothingSoundsGame() {
+  const kitState = state.kit_dreamcatcher;
+  const s = kitState.soothingSoundsState || { rain: false, birds: false, horn: true, hammer: true };
+
+  const rainCorrect = s.rain === true;
+  const birdsCorrect = s.birds === true;
+  const hornCorrect = s.horn === false;
+  const hammerCorrect = s.hammer === false;
+
+  let harmony = 0;
+  if (rainCorrect) harmony += 25;
+  if (birdsCorrect) harmony += 25;
+  if (hornCorrect) harmony += 25;
+  if (hammerCorrect) harmony += 25;
+
+  const isWon = harmony === 100;
+
+  const sounds = [
+    { id: "rain", label: "Tiếng mưa rơi dịu nhẹ", icon: "🌧️", type: "soothing", active: s.rain, note: "Thư giãn nhè nhẹ" },
+    { id: "birds", label: "Tiếng chim hót líu lo", icon: "🐦", type: "soothing", active: s.birds, note: "Bình yên vườn xanh" },
+    { id: "horn", label: "Tiếng còi xe ồn ào", icon: "🔊", type: "noise", active: s.horn, note: "Gây giật mình" },
+    { id: "hammer", label: "Tiếng búa công trường", icon: "🔨", type: "noise", active: s.hammer, note: "Gây đau đầu" }
+  ];
+
+  return `
+    <div class="minigame-screen-shell soothing-sounds-game region-friends">
+      <div class="game-instructions">
+        <p class="kicker">Màn 3: Thử thách 3 (Âm thanh bình yên)</p>
+        <h2>Hòa âm Giấc ngủ cho bé!</h2>
+        <p class="help-text">Nhấp để BẬT những âm thanh thiên nhiên dịu nhẹ 🌧️🐦 và TẮT các tiếng ồn đường phố 🔊🔨.</p>
+      </div>
+
+      <div class="soundwave-box ${isWon ? 'calm' : 'noisy'}">
+        <span class="harmony-label">🎵 Độ hài hòa giấc ngủ: ${harmony}%</span>
+        <div class="harmony-bar-wrap">
+          <div class="harmony-bar-fill" style="width: ${harmony}%"></div>
+        </div>
+        <div class="soundwave-visualizer">
+          <div class="wave-bar bar-1"></div>
+          <div class="wave-bar bar-2"></div>
+          <div class="wave-bar bar-3"></div>
+          <div class="wave-bar bar-4"></div>
+          <div class="wave-bar bar-5"></div>
+          <div class="wave-bar bar-6"></div>
+          <div class="wave-bar bar-7"></div>
+          <div class="wave-bar bar-8"></div>
+        </div>
+      </div>
+
+      <div class="sound-cards-grid">
+        ${sounds.map(sound => `
+          <button class="sound-card ${sound.type} ${sound.active ? 'active' : 'off'}" 
+            type="button" 
+            data-sound-id="${sound.id}">
+            <div class="sound-card-header">
+              <span class="sound-icon">${sound.icon}</span>
+              <span class="sound-badge ${sound.type}">${sound.type === 'soothing' ? 'Âm thanh đẹp' : 'Tiếng ồn'}</span>
+            </div>
+            <div class="sound-info">
+              <strong>${sound.label}</strong>
+              <span class="sound-note">${sound.note} · ${sound.active ? 'ĐANG PHÁT' : 'ĐÃ TẮT'}</span>
+            </div>
+            <span class="sound-action-label">${sound.active ? 'Chạm để Tắt 🛑' : 'Chạm để Bật ▶️'}</span>
+          </button>
+        `).join("")}
+      </div>
+
+      <div class="game-feedback" id="game-feedback-box">
+        <video autoplay loop muted playsinline src="${characterVideos.happy}" class="feedback-avatar"></video>
+        <p class="feedback-text" id="game-feedback-text">
+          ${isWon ? 'Hòa âm hoàn hảo! Bé Chuối Tiêu đang chìm vào giấc mơ ngọt ngào rồi!' : 'Hãy bật các âm thanh đẹp và tắt tiếng ồn đi nhé bé.'}
+        </p>
+      </div>
+
       <div class="game-controls" style="display: ${isWon ? 'block' : 'none'}">
         <button class="primary-action pulse" type="button" data-minigame-finish>
           Tiếp tục chế tạo KIT thực tế 🛠️
@@ -1446,6 +1708,12 @@ function bindEvents() {
       state[targetKit].matchedItems = [];
       state[targetKit].activeSubGameLevel = 1;
       state[targetKit].lightsOffState = { tv: true, light: true, fan: true, faucet: true };
+      state[targetKit].bugsSquishedCount = 0;
+      state[targetKit].squishedBugIds = [];
+      state[targetKit].carbonAnswers = { transport: null, bag: null, plant: null };
+      state[targetKit].nightmaresClearedCount = 0;
+      state[targetKit].clearedNightmareIds = [];
+      state[targetKit].soothingSoundsState = { rain: false, birds: false, horn: true, hammer: true };
       
       saveState();
       
@@ -1561,6 +1829,164 @@ function bindEvents() {
     if (event.target.closest("[data-minigame-next-sublevel]")) {
       const kitState = state[state.activeKitId];
       kitState.activeSubGameLevel = 2;
+      saveState();
+      renderDynamic();
+      return;
+    }
+
+    if (event.target.closest("[data-minigame-goto-level3]")) {
+      const kitState = state[state.activeKitId];
+      kitState.activeSubGameLevel = 3;
+      saveState();
+      renderDynamic();
+      return;
+    }
+
+    // Bug Squishing Click (Kit 1 - Sublevel 2)
+    const bugBtn = event.target.closest("[data-bug-id]");
+    if (bugBtn) {
+      const bugId = bugBtn.dataset.bugId;
+      const bugType = bugBtn.dataset.bugType;
+      const kitState = state.kit_green_christmas;
+      kitState.squishedBugIds = kitState.squishedBugIds || [];
+
+      if (bugType === "beetle") {
+        if (!kitState.squishedBugIds.includes(bugId)) {
+          kitState.squishedBugIds.push(bugId);
+          kitState.bugsSquishedCount = kitState.squishedBugIds.length;
+          kitState.threatHp = Math.min(100, kitState.threatHp + 14);
+          makeConfetti(12);
+          showToast("Đã diệt sâu hại! 🐛💥");
+          
+          if (kitState.squishedBugIds.length >= 5) {
+            updateBana("proud", "Thân thông sạch bóng sâu hại rồi! Hãy chuyển sang thử thách lối sống xanh nhé!");
+          } else {
+            updateBana("cheer", `Đã diệt ${kitState.squishedBugIds.length}/5 sâu hại. Cố lên bé!`);
+          }
+        }
+      } else if (bugType === "ladybug") {
+        updateBana("thinking", "Đó là bạn bọ rùa đỏ tốt bụng giúp bảo vệ lá cây, đừng diệt bạn nhé!");
+        showToast("Bọ rùa có ích! 🐞");
+      }
+      saveState();
+      renderDynamic();
+      return;
+    }
+
+    // Carbon Footprint Scenario choices click (Kit 1 - Sublevel 3)
+    const carbonBtn = event.target.closest("[data-carbon-opt-key]");
+    if (carbonBtn) {
+      const scId = carbonBtn.dataset.carbonScId;
+      const optKey = carbonBtn.dataset.carbonOptKey;
+      const kitState = state.kit_green_christmas;
+      kitState.carbonAnswers = kitState.carbonAnswers || { transport: null, bag: null, plant: null };
+
+      if (!kitState.carbonAnswers[scId]) {
+        kitState.carbonAnswers[scId] = optKey;
+        
+        // Check correctness
+        let correct = false;
+        if (scId === "transport" && optKey === "bike") correct = true;
+        if (scId === "bag" && optKey === "canvas") correct = true;
+        if (scId === "plant" && optKey === "water") correct = true;
+
+        if (correct) {
+          kitState.threatHp = Math.min(100, kitState.threatHp + 10);
+          makeConfetti(12);
+          showToast("Hành động xanh chính xác! 🎉");
+        } else {
+          showToast("Lựa chọn này chưa tối ưu môi trường nha bé! 😢");
+        }
+
+        // Count correct answers
+        let correctCount = 0;
+        if (kitState.carbonAnswers.transport === "bike") correctCount++;
+        if (kitState.carbonAnswers.bag === "canvas") correctCount++;
+        if (kitState.carbonAnswers.plant === "water") correctCount++;
+
+        if (correctCount === 3) {
+          kitState.miniGameDone = true;
+          updateBana("proud", "Dấu chân Carbon của bé đã ở mức an toàn! Rừng thông đã được cứu! Hãy làm KIT thực tế cùng bố mẹ nhé!");
+          makeConfetti(24);
+        } else {
+          if (correct) {
+            updateBana("cheer", "Đúng rồi! Hãy tiếp tục trả lời các câu hỏi sống xanh khác.");
+          } else {
+            updateBana("thinking", "Ồ, lựa chọn này chưa thân thiện lắm. Cố gắng chọn hành động xanh hơn ở thẻ sau nhé!");
+          }
+        }
+      }
+      saveState();
+      renderDynamic();
+      return;
+    }
+
+    // Nightmare Popper click (Kit 2 - Sublevel 2)
+    const nightmareBtn = event.target.closest("[data-nightmare-id]");
+    if (nightmareBtn) {
+      const nightId = nightmareBtn.dataset.nightmareId;
+      const entityType = nightmareBtn.dataset.entityType;
+      const kitState = state.kit_dreamcatcher;
+      kitState.clearedNightmareIds = kitState.clearedNightmareIds || [];
+
+      if (entityType === "nightmare") {
+        if (!kitState.clearedNightmareIds.includes(nightId)) {
+          kitState.clearedNightmareIds.push(nightId);
+          kitState.nightmaresClearedCount = kitState.clearedNightmareIds.length;
+          kitState.threatHp = Math.min(100, kitState.threatHp + 12);
+          makeConfetti(12);
+          showToast("Xua đuổi ác mộng! ☁️😈");
+
+          if (kitState.clearedNightmareIds.length >= 5) {
+            updateBana("proud", "Phòng ngủ đã sáng ngời và ấm áp! Hãy cùng Bé Chuối Tiêu làm bản hòa âm giấc ngủ nhé!");
+          } else {
+            updateBana("cheer", `Đã tiêu diệt ${kitState.clearedNightmareIds.length}/5 đám mây ác mộng.`);
+          }
+        }
+      } else if (entityType === "star") {
+        updateBana("happy", "Ngôi sao ước mơ lấp lánh đang bảo vệ giấc ngủ lành của bé!");
+        showToast("Ngôi sao mơ ước lấp lánh! 🌟");
+      }
+      saveState();
+      renderDynamic();
+      return;
+    }
+
+    // Soothing Sounds Mixer toggle (Kit 2 - Sublevel 3)
+    const soundBtn = event.target.closest("[data-sound-id]");
+    if (soundBtn) {
+      const soundId = soundBtn.dataset.soundId;
+      const kitState = state.kit_dreamcatcher;
+      kitState.soothingSoundsState = kitState.soothingSoundsState || { rain: false, birds: false, horn: true, hammer: true };
+
+      kitState.soothingSoundsState[soundId] = !kitState.soothingSoundsState[soundId];
+
+      const s = kitState.soothingSoundsState;
+      let harmony = 0;
+      if (s.rain === true) harmony += 25;
+      if (s.birds === true) harmony += 25;
+      if (s.horn === false) harmony += 25;
+      if (s.hammer === false) harmony += 25;
+
+      if (harmony === 100) {
+        kitState.miniGameDone = true;
+        updateBana("proud", "Hòa âm hoàn hảo! Bé Chuối Tiêu đã ngủ rất ngon rồi. Hãy cùng bắt tay làm bộ KIT thực tế nhé!");
+        makeConfetti(24);
+      } else {
+        if (soundId === "rain" || soundId === "birds") {
+          if (s[soundId]) {
+            updateBana("cheer", `Bật ${soundId === "rain" ? "tiếng mưa" : "tiếng chim"} nghe thật thư giãn!`);
+          } else {
+            updateBana("thinking", "Tắt mất âm thanh thiên nhiên rồi bé ơi.");
+          }
+        } else {
+          if (!s[soundId]) {
+            updateBana("cheer", `Tắt thành công ${soundId === "horn" ? "tiếng còi xe" : "tiếng búa công trường"} ồn ào!`);
+          } else {
+            updateBana("thinking", `Ồ, ${soundId === "horn" ? "tiếng còi" : "tiếng búa"} đang kêu ầm ĩ phá giấc ngủ kìa!`);
+          }
+        }
+      }
       saveState();
       renderDynamic();
       return;
@@ -1718,6 +2144,12 @@ function bindEvents() {
       state[state.activeKitId].matchedItems = [];
       state[state.activeKitId].activeSubGameLevel = 1;
       state[state.activeKitId].lightsOffState = { tv: true, light: true, fan: true, faucet: true };
+      state[state.activeKitId].bugsSquishedCount = 0;
+      state[state.activeKitId].squishedBugIds = [];
+      state[state.activeKitId].carbonAnswers = { transport: null, bag: null, plant: null };
+      state[state.activeKitId].nightmaresClearedCount = 0;
+      state[state.activeKitId].clearedNightmareIds = [];
+      state[state.activeKitId].soothingSoundsState = { rain: false, birds: false, horn: true, hammer: true };
       
       saveState();
       renderDynamic();
