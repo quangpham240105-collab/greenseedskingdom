@@ -9,6 +9,8 @@ function initBackgroundMusic() {
   bgMusic = new Audio("./assets/audio/tiny-paws.mp3");
   bgMusic.loop = true;
   bgMusic.volume = 0.22; // Âm lượng nền dịu nhẹ tránh chói tai
+  bgMusic.preload = "auto";
+  bgMusic.load(); // Kích hoạt tải trước nhạc nền trong nền
 }
 
 function tryPlayMusic() {
@@ -18,7 +20,7 @@ function tryPlayMusic() {
     removeInteractionListeners();
   }).catch((err) => {
     console.log("Autoplay was prevented by browser, waiting for user interaction.", err);
-    bgMusic = null;
+    // Giữ nguyên đối tượng Audio để tiếp tục tiến trình tải nền (preload), không đặt về null
   });
 }
 
