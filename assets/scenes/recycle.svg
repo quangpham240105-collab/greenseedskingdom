@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 540" role="img" aria-label="Rừng tái chế">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#dcfff0"/>
+      <stop offset="1" stop-color="#b7e7ff"/>
+    </linearGradient>
+    <linearGradient id="hill" x1="0" x2="1">
+      <stop offset="0" stop-color="#45c86d"/>
+      <stop offset="1" stop-color="#16864b"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="540" rx="42" fill="url(#sky)"/>
+  <circle cx="734" cy="112" r="66" fill="#ffd93d"/>
+  <path d="M0 398c118-78 192-52 292-96 140-62 236 10 334 20 104 10 174-38 274-2v220H0z" fill="url(#hill)"/>
+  <path d="M95 340h118l-18 126H113z" fill="#5f432a"/>
+  <path d="M72 326c44-94 134-98 181-8-58 24-115 26-181 8z" fill="#18a75a"/>
+  <path d="M626 310h118l-14 132H642z" fill="#5f432a"/>
+  <path d="M590 300c62-106 146-100 194-6-63 30-126 30-194 6z" fill="#1fb064"/>
+  <rect x="338" y="284" width="224" height="154" rx="28" fill="#ffffff" stroke="#101725" stroke-width="12"/>
+  <path d="M405 390c40 28 91 22 122-12" fill="none" stroke="#2cc36b" stroke-width="20" stroke-linecap="round"/>
+  <path d="M476 332l44 20-36 30" fill="none" stroke="#2cc36b" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M428 356l-44-20 36-30" fill="none" stroke="#2cc36b" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="300" y="402" width="84" height="56" rx="16" fill="#ffd93d" stroke="#101725" stroke-width="10"/>
+  <rect x="546" y="400" width="84" height="58" rx="16" fill="#1fb7ff" stroke="#101725" stroke-width="10"/>
+</svg>

@@ -1,0 +1,5 @@
+server.err.log
+server.out.log
+.vscode/
+.DS_Store
+*.log

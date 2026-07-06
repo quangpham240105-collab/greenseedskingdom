@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 540" role="img" aria-label="Thành phố tiết kiệm">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff5b8"/>
+      <stop offset="1" stop-color="#c6edff"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="540" rx="42" fill="url(#bg)"/>
+  <circle cx="724" cy="118" r="72" fill="#ffd93d" stroke="#101725" stroke-width="10"/>
+  <rect x="106" y="216" width="150" height="230" rx="22" fill="#6337d8" stroke="#101725" stroke-width="12"/>
+  <rect x="306" y="160" width="178" height="286" rx="24" fill="#1fb7ff" stroke="#101725" stroke-width="12"/>
+  <rect x="540" y="234" width="180" height="212" rx="24" fill="#2cc36b" stroke="#101725" stroke-width="12"/>
+  <g fill="#fffdf6" stroke="#101725" stroke-width="8">
+    <rect x="136" y="250" width="34" height="34" rx="8"/>
+    <rect x="194" y="250" width="34" height="34" rx="8"/>
+    <rect x="340" y="202" width="38" height="38" rx="8"/>
+    <rect x="410" y="202" width="38" height="38" rx="8"/>
+    <rect x="340" y="282" width="38" height="38" rx="8"/>
+    <rect x="410" y="282" width="38" height="38" rx="8"/>
+    <rect x="586" y="278" width="42" height="42" rx="8"/>
+    <rect x="652" y="278" width="42" height="42" rx="8"/>
+  </g>
+  <path d="M432 424l70-126h-52l38-92-116 138h62z" fill="#ffd93d" stroke="#101725" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M0 446h900v94H0z" fill="#101725" opacity=".12"/>
+</svg>
