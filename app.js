@@ -1521,7 +1521,7 @@ function GameCover() {
         <!-- SECTION: HÀNH TRÌNH BẢO VỆ XỨ SỞ -->
         <section id="journey" class="landing-section journey-section">
           <div class="section-container" style="max-width: 1100px; margin: 0 auto; text-align: center; padding: 0 16px;">
-            <img src="./assets/scenes/journey-timeline.png" alt="Hành trình bảo vệ xứ sở" class="journey-timeline-img" style="width: 100%; height: auto; border-radius: 28px; box-shadow: 0 15px 45px rgba(63, 159, 86, 0.08);" />
+            <img src="./assets/scenes/journey-timeline.jpg" alt="Hành trình bảo vệ xứ sở" class="journey-timeline-img" style="width: 100%; height: auto; border-radius: 28px; box-shadow: 0 15px 45px rgba(63, 159, 86, 0.08);" />
           </div>
         </section>
 
