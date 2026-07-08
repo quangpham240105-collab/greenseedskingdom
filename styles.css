@@ -6225,6 +6225,12 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1;
 }
 
+.tree-growth-video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 @keyframes bounceTree {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-12px); }

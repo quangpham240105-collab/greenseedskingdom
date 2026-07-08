@@ -1530,12 +1530,12 @@ function GameCover() {
           <div class="section-container">
             <h2 class="section-title">HẠT MẦM TÍCH LŨY</h2>
             <div class="tree-growth-wrapper">
-              <div class="tree-visual-box" ${state.seeds < 10 ? 'style="padding: 0; overflow: hidden; border: none; background: transparent; width: 220px; flex-shrink: 0;"' : ''}>
+              <div class="tree-visual-box" style="${state.seeds < 10 ? 'padding: 0; overflow: hidden; border: none; background: transparent; width: 220px; flex-shrink: 0;' : 'padding: 0 0 24px 0; overflow: hidden;' }">
                 ${state.seeds >= 20 ? `
                   <div class="tree-emoji">🌳</div>
                   <div class="tree-badge">Cây Đại Thụ Xanh</div>
                 ` : state.seeds >= 10 ? `
-                  <div class="tree-emoji">🌿</div>
+                  <video autoplay loop muted playsinline src="./assets/scenes/cay-mam-chuyen-dong.mp4" class="tree-growth-video"></video>
                   <div class="tree-badge">Cây Mầm Non Nớt</div>
                 ` : `
                   <img src="./assets/scenes/seed-character.png" alt="Hạt Mầm Nhỏ Bé" style="width: 100%; height: auto; border-radius: 28px;" />
